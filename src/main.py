@@ -47,6 +47,8 @@ def parse_args(args):
                         help="How many jobs to execute at once. (default=1)")
     parser.add_argument("--liblto", type=str, dest="liblto", default=None,
                         help="libLTO.dylib path to overwrite the default")
+    parser.add_argument("--xml", type=str, dest="use_xml", default=None,
+                        help="XML path to overwrite the default in bitcode")
     parser.add_argument("--compile-swift-with-clang", action="store_true",
                         dest="compile_with_clang", help=argparse.SUPPRESS)
 
@@ -75,12 +77,23 @@ def main(args=None):
             env.error(u"path passed to --symbol-map doesn't exists: {}".format(
                     args.symbol_map))
 
+        ## todo: add pre-processing for lipo a static library and extract prelinked single .o
+        ##
+        ## After pre-processing, we have a macho file
+
         input_macho = Macho(args.input_macho_file)
         if input_macho == MachoType.Error:
             env.error(u"Input is not a macho file: {}".format(
                     args.input_macho_file))
 
-        map(input_macho.buildBitcode, input_macho.getArchs())
+        use_xml = args.use_xml;
+        if use_xml is not None and \
+            not os.path.isfile(args.input_macho_file):
+            env.error(
+                u"Input XML file doesn't exist: {}".format(
+                    args.use_xml))
+
+        map(lambda arch: input_macho.buildBitcode(arch, use_xml), input_macho.getArchs())
 
         if (args.dsym_output is not None and
             not any([x.contain_symbols for x in input_macho.output_slices]) and
@@ -104,6 +117,10 @@ def main(args=None):
                 cmdtool.StripSymbols(args.output).run()
             else:
                 cmdtool.StripDebug(args.output, args.strip_swift).run()
+
+            ## todo: add post-processing
+            ##
+            ## After pre-processing, we have a macho file
     finally:
         env.cleanupTempDirectories()
 

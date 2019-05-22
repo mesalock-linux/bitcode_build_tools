@@ -53,7 +53,7 @@ class BitcodeBundle(xar):
 
     """BitcodeBundle class"""
 
-    def __init__(self, arch, input_xar, output_path):
+    def __init__(self, arch, input_xar, output_path, use_xml = None):
         self.output = os.path.realpath(output_path)
         self.returncode = 0
         self.stdout = ""
@@ -64,7 +64,15 @@ class BitcodeBundle(xar):
         self.deployment_target = None
         self.force_optimize_swift = False
         self.is_compile_with_clang = env.compile_with_clang
+
+        # zf: read from xar xml during super class initialization
         super(BitcodeBundle, self).__init__(input_xar)
+        if use_xml:
+            data = ""
+            with open(use_xml, 'r') as file:
+                data = file.read()
+            self.xml = ET.fromstring(data)
+
         try:
             self.platform = self.subdoc.find("platform").text
             self.sdk_version = self.subdoc.find("sdkversion").text

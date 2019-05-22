@@ -143,6 +143,41 @@ class Ld(CompileCmd):
         else:
             return self
 
+class AR(Cmd):
+
+    """Run AR command"""
+
+    def __init__(self, working_dir=os.getcwd()):
+        self.ar= "/usr/bin/ar"
+        super(AR, self).__init__([self.ar], working_dir)
+
+    def run(self):
+        self.run_cmd(False)
+        return sel
+
+class UnarchiveStaticLib(AR):
+
+    """ Unarchive .a file in current working directory """
+    def __init__(self, thin_input, working_dir=os.getcwd()):
+        super(AR, self).__init__(working_dir)
+        self.cmd = [self._ar, "-x", thin_input]
+
+    def run(self):
+        """check the input info, this command can fail"""
+        self.run_cmd(True)
+        return self
+
+class AssembleStaticLib(AR):
+
+    """ Archive into .a file """
+    def __init__(self, inputList, output, working_dir=os.getcwd()):
+        super(AR, self).__init__(working_dir)
+        self.cmd = [self._ar, "-rcs", output, inputList]
+
+    def run(self):
+        """check the input info, this command can fail"""
+        self.run_cmd(True)
+        return self
 
 class Lipo(Cmd):
 

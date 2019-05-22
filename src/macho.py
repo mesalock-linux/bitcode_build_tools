@@ -122,12 +122,20 @@ class Macho(object):
         else:
             return file
 
-    def buildBitcode(self, arch):
+    """
+    Caller can provide an customized xml file for the build process.
+    The cusotimzed xml file is a modified version of extracted info from xar.
+    """
+    def buildBitcode(self, arch, use_xml = None):
         output_path = os.path.join(self._temp_dir,
                                    self.name + "." + arch + ".out")
         bundle = self.getXAR(arch)
-        env.setUUID(self.uuid[arch])
-        bitcode_bundle = BitcodeBundle(arch, bundle, output_path).run()
+        # "GetUUID" depends on dwarfdump -u ouput
+        # When processing .a files, always output empty string
+        # Here we use a default value to continue the process.
+        uuid = self.uuid.get(arch, "8819d674-7b66-11e9-8f9e-2a86e4085a59")
+        env.setUUID(uuid)
+        bitcode_bundle = BitcodeBundle(arch, bundle, output_path, use_xml).run()
         self.output_slices.append(bitcode_bundle)
         return bitcode_bundle
 
