@@ -76,7 +76,7 @@ class LogDeobfuscator(object):
                 sym = symbol_map[i + 1].encode("UTF-8")
                 new_msg = msg.replace("__hidden#" + number + "_",
                                       sym.strip())
-            except ValueError, IndexError:
+            except (ValueError, IndexError):
                 return None
             if new_msg == msg:
                 return None  # Don't infinite loop
@@ -286,7 +286,7 @@ class BuildEnvironment(object):
             self.debug("Library Seach List:")
             self.debug(self._dylib_list)
         else:
-            self.error("library list doesn't exist: %s".format(filename))
+            self.error("library list doesn't exist: {}".format(filename))
 
     def findLibraryInDir(self, directory, lib, framework_dir=False):
         """Search a directory to find the library"""
