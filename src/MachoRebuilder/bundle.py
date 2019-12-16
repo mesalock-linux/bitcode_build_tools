@@ -179,6 +179,10 @@ class BitcodeBundle(xar):
                               name, clang_option_verifier.error_msg))
             if env.getPlatform() == "watchos":
                 clang.addArgs(["-fno-gnu-inline-asm"])
+            
+            # gongjl build bitcode and cmd
+            clang.addArgs(["-fembed-bitcode=all"]) 
+
             return clang
         elif xml_node.find("swift") is not None:
             # swift uses extension to distinguish input type
@@ -251,6 +255,10 @@ class BitcodeBundle(xar):
         linker = Ld(self.output, self.dir)
         linker.addArgs(["-arch", self.arch])
         linker.addArgs(self.linkOptions)
+
+        # gongjl ld add __LLVM __Bundle
+        linker.addArgs(["-bitcode_bundle"])
+
         # handle bitcode input
         bitcode_files = self.getFileNode("Bitcode")
         if len(bitcode_files) > 0:
